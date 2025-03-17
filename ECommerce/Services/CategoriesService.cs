@@ -2,21 +2,45 @@
 using ECommerce.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace ECommerce.Services
+public class CategoriesService
 {
-    public class CategoriesService
+    private readonly ApplicationDbContext _dbContext;
+
+    public CategoriesService(ApplicationDbContext dbContext)
     {
-        private readonly ApplicationDbContext _context;
+        _dbContext = dbContext;
+    }
 
-        public CategoriesService(ApplicationDbContext context)
+    public async Task<List<Category>> GetCategoriesAsync()
+    {
+        return await _dbContext.Categories.ToListAsync();
+    }
+
+    public async Task SaveCategoryAsync(Category category)
+    {
+        if (category.Id == 0)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _dbContext.Categories.Add(category);
         }
-
-        public async Task<List<Category>> GetCategoriesAsync()
+        else
         {
-            return await _context.Categories.ToListAsync();
+            var existingCategory = await _dbContext.Categories.FindAsync(category.Id);
+            if (existingCategory != null)
+            {
+                existingCategory.Name = category.Name;
+                existingCategory.Description = category.Description;
+            }
         }
+        await _dbContext.SaveChangesAsync();
+    }
 
+    public async Task DeleteCategoryAsync(int id)
+    {
+        var category = await _dbContext.Categories.FindAsync(id);
+        if (category != null)
+        {
+            _dbContext.Categories.Remove(category);
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

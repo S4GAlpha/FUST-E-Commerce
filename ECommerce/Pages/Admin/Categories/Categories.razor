@@ -1,7 +1,7 @@
 ﻿@page "/Admin/categories"
 @using ECommerce.Models
-@using ECommerce.Data
-@inject ApplicationDbContext DbContext
+@using ECommerce.Services
+@inject CategoriesService CategoriesService
 
 <h3 class="mb-4">Gestione Categorie</h3>
 
@@ -63,25 +63,12 @@
 
     private async Task LoadCategories()
     {
-        CategoriesList = await Task.Run(() => DbContext.Categories.ToList());
+        CategoriesList = await CategoriesService.GetCategoriesAsync();
     }
 
     private async Task SaveCategory()
     {
-        if (EditingCategory.Id == 0)
-        {
-            DbContext.Categories.Add(EditingCategory);
-        }
-        else
-        {
-            var existingCategory = DbContext.Categories.Find(EditingCategory.Id);
-            if (existingCategory != null)
-            {
-                existingCategory.Name = EditingCategory.Name;
-                existingCategory.Description = EditingCategory.Description;
-            }
-        }
-        await DbContext.SaveChangesAsync();
+        await CategoriesService.SaveCategoryAsync(EditingCategory);
         await LoadCategories();
         ResetForm();
     }
@@ -98,13 +85,8 @@
 
     private async Task DeleteCategory(int id)
     {
-        var category = DbContext.Categories.Find(id);
-        if (category != null)
-        {
-            DbContext.Categories.Remove(category);
-            await DbContext.SaveChangesAsync();
-            await LoadCategories();
-        }
+        await CategoriesService.DeleteCategoryAsync(id);
+        await LoadCategories();
     }
 
     private void ResetForm()

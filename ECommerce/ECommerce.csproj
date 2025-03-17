@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <Folder Include="Pages\Admin\Users\" />
-    <Folder Include="wwwroot\images\" />
+    <Folder Include="wwwroot\imports\" />
   </ItemGroup>
 
 </Project>

@@ -1,10 +1,8 @@
 ﻿@page "/Admin/products"
 @using ECommerce.Models
-@using ECommerce.Data
-@using Microsoft.EntityFrameworkCore
+@using ECommerce.Services
 @using Microsoft.AspNetCore.Components.Forms
-@inject ApplicationDbContext DbContext
-@inject IWebHostEnvironment WebHostEnvironment
+@inject ProductService ProductService
 
 <h3 class="mb-4">Gestione Prodotti</h3>
 
@@ -70,7 +68,7 @@
                     <td>
                         @if (!string.IsNullOrEmpty(product.ImageUrl))
                         {
-                            <img src="@product.ImageUrl" alt="@product.Name" style="width: 50px; height: auto;" />
+                            <img src="@(!string.IsNullOrEmpty(product.ImageUrl) ? product.ImageUrl : "images/default-image.png")" alt="@product.Name" class="product-image" style="width: 50px; height: auto;" />
                         }
                     </td>
                     <td>@product.Name</td>
@@ -95,50 +93,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadProducts();
-        await LoadCategories();
-    }
-
-    private async Task LoadProducts()
-    {
-        ProductsList = await Task.Run(() => DbContext.Products.Include(p => p.Category).ToList());
-    }
-
-    private async Task LoadCategories()
-    {
-        CategoriesList = await Task.Run(() => DbContext.Categories.ToList());
+        ProductsList = await ProductService.GetProductsAsync();
+        CategoriesList = await ProductService.GetCategoriesAsync();
     }
 
     private async Task SaveProduct()
     {
-        if (selectedFile != null)
-        {
-            var filePath = Path.Combine(WebHostEnvironment.WebRootPath, "images", selectedFile.Name);
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await selectedFile.OpenReadStream().CopyToAsync(stream);
-            }
-            EditingProduct.ImageUrl = $"/images/{selectedFile.Name}";
-        }
-
-        if (EditingProduct.Id == 0)
-        {
-            DbContext.Products.Add(EditingProduct);
-        }
-        else
-        {
-            var existingProduct = DbContext.Products.Find(EditingProduct.Id);
-            if (existingProduct != null)
-            {
-                existingProduct.Name = EditingProduct.Name;
-                existingProduct.Description = EditingProduct.Description;
-                existingProduct.Price = EditingProduct.Price;
-                existingProduct.ImageUrl = EditingProduct.ImageUrl;
-                existingProduct.CategoryId = EditingProduct.CategoryId;
-            }
-        }
-        await DbContext.SaveChangesAsync();
-        await LoadProducts();
+        await ProductService.SaveProductAsync(EditingProduct, selectedFile);
+        ProductsList = await ProductService.GetProductsAsync();
         ResetForm();
     }
 
@@ -157,13 +119,8 @@
 
     private async Task DeleteProduct(int id)
     {
-        var product = DbContext.Products.Find(id);
-        if (product != null)
-        {
-            DbContext.Products.Remove(product);
-            await DbContext.SaveChangesAsync();
-            await LoadProducts();
-        }
+        await ProductService.DeleteProductAsync(id);
+        ProductsList = await ProductService.GetProductsAsync();
     }
 
     private void ResetForm()

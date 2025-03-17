@@ -1,0 +1,13 @@
+Nome,Descrizione,Prezzo,CategoriaId,ImageUrl
+Pasta Barilla,Confezione da 500g di pasta Barilla,1.50,1,pasta.jpg
+PlayStation 5,Console di gioco Sony PlayStation 5,499.99,2,ps5.jpg
+iPhone 13,Smartphone Apple iPhone 13,999.99,3,iphone13.jpg
+Maglietta Nike,Maglietta sportiva Nike,29.99,4,nike-shirt.jpg
+Il Signore degli Anelli,Libro di J.R.R. Tolkien,19.99,5,lotr.jpg
+Lego Star Wars,Set di costruzioni Lego Star Wars,59.99,6,lego-star-wars.jpg
+Pentola a pressione,Pentola a pressione in acciaio inox,39.99,7,pressure-cooker.jpg
+Bicicletta da corsa,Bicicletta da corsa professionale,999.99,8,racing-bike.jpg
+Crema idratante,Crema idratante per il viso,14.99,9,moisturizer.jpg
+Tavolo da giardino,Tavolo in legno per giardino,199.99,10,garden-table.jpg
+Olio motore,Olio motore sintetico,29.99,11,engine-oil.jpg
+Chitarra acustica,Chitarra acustica in legno,149.99,12,acoustic-guitar.jpg

@@ -31,7 +31,7 @@
         @foreach (var product in filteredProducts)
         {
             <div class="product-card" @onclick="() => NavigateToProductDetail(product.Id)">
-                <img src="@product.ImageUrl" alt="@product.Name" class="product-image" />
+                <img src="@(!string.IsNullOrEmpty(product.ImageUrl) ? product.ImageUrl : "images/default-image.png")" alt="@product.Name" class="product-image" />
                 <div class="product-name">@product.Name</div>
                 <div class="product-price">@product.Price.ToString("C")</div>
                 <div class="product-category">@product.Category?.Name</div>

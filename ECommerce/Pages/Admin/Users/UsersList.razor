@@ -1,0 +1,131 @@
+﻿@page "/admin/users"
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.EntityFrameworkCore
+@using ECommerce.Data
+@using ECommerce.Components.Account
+@using MailKit.Net.Smtp;
+@using MailKit;
+@using MimeKit;
+@using System.Text
+@using System.Text.Encodings.Web
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@inject IEmailSender<ApplicationUser> EmailSender
+
+<h3>Lista utenti</h3>
+
+@if (users == null)
+{
+	<p>Caricamento in corso...</p>
+}
+else if (users.Count == 0)
+{
+	<p>Nessun utente trovato.</p>
+}
+else
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Nome utente</th>
+				<th>Email</th>
+				<th>Modifica</th>
+				<th>Reset Password</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var user in users)
+			{
+				<tr>
+					<td>@user.UserName</td>
+					<td>@user.Email</td>
+					<td><button class="btn btn-primary" @onclick="() => EditUser(user)">Modifica</button></td>
+					<td><button class="btn btn-primary" @onclick="() => ResetPassword(user) ">Reset Password</button></td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+@if (isEditDialogOpen)
+{
+	<EditForm Model="selectedUser" OnValidSubmit="SaveUser">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+		<div class="form-group">
+			<label for="UserName">User Name</label>
+			<InputText id="UserName" class="form-control" @bind-Value="selectedUser.UserName" />
+		</div>
+		<div class="form-group">
+			<label for="Email">Email</label>
+			<InputText id="Email" class="form-control" @bind-Value="selectedUser.Email" />
+		</div>
+		<div class="form-group">
+			<label for="PhoneNumber">Phone Number</label>
+			<InputText id="PhoneNumber" class="form-control" @bind-Value="selectedUser.PhoneNumber" />
+		</div>
+		<button type="submit" class="btn btn-primary">Salva</button>
+		<button type="button" class="btn btn-secondary" @onclick="CloseEditDialog">Annulla</button>
+	</EditForm>
+}
+
+@code {
+	private List<ApplicationUser>? users;
+	private ApplicationUser? selectedUser;
+	private ApplicationUser? userToChangePassword;
+	private bool isEditDialogOpen = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		users = await UserManager.Users.ToListAsync();
+	}
+
+	private void EditUser(ApplicationUser user)
+	{
+		selectedUser = user;
+		isEditDialogOpen = true;
+	}
+
+	private void CloseEditDialog()
+	{
+		isEditDialogOpen = false;
+		selectedUser = null;
+	}
+
+	private async Task SaveUser()
+	{
+		if (selectedUser != null)
+		{
+			var result = await UserManager.UpdateAsync(selectedUser);
+			if (result.Succeeded)
+			{
+				isEditDialogOpen = false;
+				selectedUser = null;
+				users = await UserManager.Users.ToListAsync();
+			}
+		}
+	}
+
+	private void ResetPassword(ApplicationUser user)
+	{
+		userToChangePassword = user;
+	}
+
+	private async Task ResetPassword()
+	{
+		if (userToChangePassword != null)
+		{
+			// For more information on how to enable account confirmation and password reset please
+			// visit https://go.microsoft.com/fwlink/?LinkID=532713
+			var code = await UserManager.GeneratePasswordResetTokenAsync(userToChangePassword);
+			code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+			var callbackUrl = NavigationManager.GetUriWithQueryParameters(
+				NavigationManager.ToAbsoluteUri("Account/ResetPassword").AbsoluteUri,
+				new Dictionary<string, object?> { ["code"] = code });
+
+			await EmailSender.SendPasswordResetLinkAsync(userToChangePassword, userToChangePassword.Email, HtmlEncoder.Default.Encode(callbackUrl));
+
+		}
+	}
+}

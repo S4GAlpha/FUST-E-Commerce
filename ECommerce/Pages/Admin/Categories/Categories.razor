@@ -1,0 +1,106 @@
+﻿@page "/categories"
+@using ECommerce.Models
+@using ECommerce.Data
+@inject ApplicationDbContext DbContext
+
+<h3>Gestione Categorie</h3>
+
+<!-- Form per aggiungere/modificare una categoria -->
+<div class="card p-3">
+    <h5>@(EditingCategory.Id == 0 ? "Aggiungi Categoria" : "Modifica Categoria")</h5>
+    <div class="mb-3">
+        <label>Nome:</label>
+        <input type="text" class="form-control" @bind="EditingCategory.Name" />
+    </div>
+    <div class="mb-3">
+        <label>Descrizione:</label>
+        <textarea class="form-control" @bind="EditingCategory.Description"></textarea>
+    </div>
+    <button class="btn btn-primary" @onclick="SaveCategory">@(EditingCategory.Id == 0 ? "Aggiungi" : "Aggiorna")</button>
+    <button class="btn btn-secondary ms-2" @onclick="ResetForm">Annulla</button>
+</div>
+
+<!-- Lista delle categorie -->
+<table class="table mt-4">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Descrizione</th>
+            <th>Azioni</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var category in CategoriesList)
+        {
+            <tr>
+                <td>@category.Name</td>
+                <td>@category.Description</td>
+                <td>
+                    <button class="btn btn-warning btn-sm" @onclick="() => EditCategory(category)">Modifica</button>
+                    <button class="btn btn-danger btn-sm ms-2" @onclick="() => DeleteCategory(category.Id)">Elimina</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Category> CategoriesList = new();
+    private Category EditingCategory = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+    }
+
+    private async Task LoadCategories()
+    {
+        CategoriesList = await Task.Run(() => DbContext.Categories.ToList());
+    }
+
+    private async Task SaveCategory()
+    {
+        if (EditingCategory.Id == 0)
+        {
+            DbContext.Categories.Add(EditingCategory);
+        }
+        else
+        {
+            var existingCategory = DbContext.Categories.Find(EditingCategory.Id);
+            if (existingCategory != null)
+            {
+                existingCategory.Name = EditingCategory.Name;
+                existingCategory.Description = EditingCategory.Description;
+            }
+        }
+        await DbContext.SaveChangesAsync();
+        await LoadCategories();
+        ResetForm();
+    }
+
+    private void EditCategory(Category category)
+    {
+        EditingCategory = new Category
+            {
+                Id = category.Id,
+                Name = category.Name,
+                Description = category.Description
+            };
+    }
+
+    private async Task DeleteCategory(int id)
+    {
+        var category = DbContext.Categories.Find(id);
+        if (category != null)
+        {
+            DbContext.Categories.Remove(category);
+            await DbContext.SaveChangesAsync();
+            await LoadCategories();
+        }
+    }
+
+    private void ResetForm()
+    {
+        EditingCategory = new Category();
+    }
+}

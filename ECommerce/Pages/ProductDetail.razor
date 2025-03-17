@@ -1,0 +1,98 @@
+﻿@page "/ProductDetail/{ProductId:int}"
+@using ECommerce.Models
+@using ECommerce.Services
+@inject ProductService ProductService
+@inject NavigationManager Navigation
+
+<PageTitle>Product Detail</PageTitle>
+
+<h2>Product Detail</h2>
+
+@if (product == null)
+{
+    <div>Loading...</div>
+}
+else
+{
+    <div class="product-detail">
+        <img src="@(!string.IsNullOrEmpty(product.ImageUrl) ? product.ImageUrl : "images/default-image.png")" alt="@product.Name" class="product-image" />
+        <div class="product-info">
+            <h3>@product.Name</h3>
+            <p style="font-size: 13px;">( @product.Category?.Name )</p>
+            <p>@product.Description</p>
+            <p>Price per piece: @product.Price.ToString("C")</p>
+            <div class="purchase-section">
+                <input type="number" min="1" value="@quantity" @oninput="UpdateQuantity" class="quantity-input" />
+                <button class="buy-button">Compra</button>
+            </div>
+            <p>Total Price: @(product.Price * quantity)</p>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int ProductId { get; set; }
+
+    private Product? product;
+    private int quantity = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        product = await ProductService.GetProductByIdAsync(ProductId);
+    }
+
+    private void UpdateQuantity(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int newQuantity))
+        {
+            quantity = newQuantity;
+        }
+    }
+}
+
+<style>
+    .product-detail {
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .product-image {
+        max-width: 400px;
+        border-radius: 10px;
+    }
+
+    .product-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .purchase-section {
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .quantity-input {
+        width: 60px;
+        padding: 5px;
+        font-size: 1rem;
+    }
+
+    .buy-button {
+        padding: 10px 20px;
+        font-size: 1rem;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+        .buy-button:hover {
+            background-color: #0056b3;
+        }
+</style>

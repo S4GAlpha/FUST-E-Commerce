@@ -1,0 +1,96 @@
+﻿@page "/Admin/categories"
+@using ECommerce.Models
+@using ECommerce.Services
+@inject CategoriesService CategoriesService
+
+<h3 class="mb-4">Gestione Categorie</h3>
+
+<!-- Form per aggiungere/modificare una categoria -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">@(EditingCategory.Id == 0 ? "Aggiungi Categoria" : "Modifica Categoria")</h5>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label class="form-label">Nome:</label>
+            <input type="text" class="form-control" @bind="EditingCategory.Name" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Descrizione:</label>
+            <textarea class="form-control" @bind="EditingCategory.Description"></textarea>
+        </div>
+        <div class="d-flex justify-content-end">
+            <button class="btn btn-primary me-2" @onclick="SaveCategory">@(EditingCategory.Id == 0 ? "Aggiungi" : "Aggiorna")</button>
+            <button class="btn btn-secondary" @onclick="ResetForm">Annulla</button>
+        </div>
+    </div>
+</div>
+
+<!-- Lista delle categorie -->
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Nome</th>
+                <th>Descrizione</th>
+                <th>Azioni</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var category in CategoriesList)
+            {
+                <tr>
+                    <td>@category.Name</td>
+                    <td>@category.Description</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" @onclick="() => EditCategory(category)">Modifica</button>
+                        <button class="btn btn-danger btn-sm ms-2" @onclick="() => DeleteCategory(category.Id)">Elimina</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private List<Category> CategoriesList = new();
+    private Category EditingCategory = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+    }
+
+    private async Task LoadCategories()
+    {
+        CategoriesList = await CategoriesService.GetCategoriesAsync();
+    }
+
+    private async Task SaveCategory()
+    {
+        await CategoriesService.SaveCategoryAsync(EditingCategory);
+        await LoadCategories();
+        ResetForm();
+    }
+
+    private void EditCategory(Category category)
+    {
+        EditingCategory = new Category
+            {
+                Id = category.Id,
+                Name = category.Name,
+                Description = category.Description
+            };
+    }
+
+    private async Task DeleteCategory(int id)
+    {
+        await CategoriesService.DeleteCategoryAsync(id);
+        await LoadCategories();
+    }
+
+    private void ResetForm()
+    {
+        EditingCategory = new Category();
+    }
+}

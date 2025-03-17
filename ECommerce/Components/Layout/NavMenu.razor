@@ -27,6 +27,23 @@
         <AuthorizeView>
             <Authorized>
                 <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/Admin/categories">
+                        <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Categories
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/Admin/products">
+                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Products
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/Admin/imports">
+                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Imports
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Manage">
                         <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
                     </NavLink>

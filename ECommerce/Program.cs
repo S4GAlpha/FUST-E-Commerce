@@ -1,6 +1,7 @@
 using ECommerce.Components;
 using ECommerce.Components.Account;
 using ECommerce.Data;
+using ECommerce.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,10 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<CategoriesService>();
+builder.Services.AddScoped<ImportService>();
+
 
 builder.Services.AddAuthentication(options =>
     {

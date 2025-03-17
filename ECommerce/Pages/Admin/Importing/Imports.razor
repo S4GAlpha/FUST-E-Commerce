@@ -1,0 +1,29 @@
+﻿@page "/Admin/imports"
+@using ECommerce.Services
+@inject ImportService ImportService
+
+<h3>Imports</h3>
+
+<div class="d-flex justify-content-end mt-4">
+    <button class="btn btn-primary" @onclick="ImportCategories">Importa Categorie</button>
+</div>
+
+<div class="d-flex justify-content-end mt-4">
+    <button class="btn btn-primary" @onclick="ImportProducts">Importa Prodotti</button>
+</div>
+
+@code {
+    private async Task ImportCategories()
+    {
+        // Specifica il percorso del file CSV nella cartella wwwroot/imports
+        string filePath = Path.Combine(Environment.CurrentDirectory, "wwwroot", "imports", "categories.csv");
+        await ImportService.ImportCategoriesFromCsv(filePath);
+    }
+
+    private async Task ImportProducts()
+    {
+        // Specifica il percorso del file CSV nella cartella wwwroot/imports
+        string filePath = Path.Combine(Environment.CurrentDirectory, "wwwroot", "imports", "products.csv");
+        await ImportService.ImportProductsFromCsv(filePath);
+    }
+}

@@ -1,7 +1,120 @@
 ﻿@page "/"
 
+@using ECommerce.Models
+@using ECommerce.Services
+@inject ProductService ProductService
+@inject NavigationManager Navigation
+
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Benvenuto nel nostro negozio!</h1>
 
-Welcome to your new app.
+<div class="filter-section">
+    <label for="categoryFilter">Filtra per categoria:</label>
+    <select id="categoryFilter" class="form-control" @bind="selectedCategoryId" @bind:after="FilterProducts">
+        <option value="">-- Tutte le categorie --</option>
+        @foreach (var category in CategoriesList)
+        {
+            <option value="@category.Id">@category.Name</option>
+        }
+    </select>
+</div>
+
+<h2>Prodotti</h2>
+<div class="product-list">
+    @if (filteredProducts == null)
+    {
+        <div>Caricamento...</div>
+    }
+    else
+    {
+        @foreach (var product in filteredProducts)
+        {
+            <div class="product-card" @onclick="() => NavigateToProductDetail(product.Id)">
+                <img src="@product.ImageUrl" alt="@product.Name" class="product-image" />
+                <div class="product-name">@product.Name</div>
+                <div class="product-price">@product.Price.ToString("C")</div>
+                <div class="product-category">@product.Category?.Name</div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private List<Product>? products;
+    private List<Product>? filteredProducts;
+    private List<Category> CategoriesList = new();
+    private int? selectedCategoryId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await ProductService.GetProductsAsync();
+        filteredProducts = products;
+        CategoriesList = await ProductService.GetCategoriesAsync();
+    }
+
+    private void FilterProducts()
+    {
+        if (selectedCategoryId.HasValue && selectedCategoryId.Value > 0)
+        {
+            filteredProducts = products?.Where(p => p.CategoryId == selectedCategoryId).ToList();
+        }
+        else
+        {
+            filteredProducts = products;
+        }
+    }
+
+    private void NavigateToProductDetail(int productId)
+    {
+        Navigation.NavigateTo($"/ProductDetail/{productId}");
+    }
+}
+
+<style>
+    .filter-section {
+        margin-bottom: 20px;
+    }
+
+    .product-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .product-card {
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        width: 200px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .product-card:hover {
+        background-color: #f0f0f0;
+        transform: scale(1.05);
+    }
+
+    .product-image {
+        max-width: 100%;
+        border-radius: 10px;
+    }
+
+    .product-name {
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    .product-price {
+        color: green;
+        margin-top: 5px;
+    }
+
+    .product-category {
+        font-size: 0.9em;
+        color: #555;
+        margin-top: 5px;
+    }
+</style>

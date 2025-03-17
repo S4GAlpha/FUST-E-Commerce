@@ -3,9 +3,7 @@
 Realizzare un'applicazione che simuli un e-commerce, con le seguenti funzionalità:
  > [DEV 1] gestione categorie (lista, inserimento, modifica, creazione) [solo utenti admins] /admin/categories
 
- > [DEV 1] gestione prodotti (lista, inserimento, modifica, creazione)
-
- [solo utenti admins]   /admin/products
+ > [DEV 1] gestione prodotti (lista, inserimento, modifica, creazione) [solo utenti admins]   /admin/products
  > [DEV 2] gestione utenti (lista, modifica, reset password)
 
  [solo utenti admins]   /admin/users
